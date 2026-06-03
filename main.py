@@ -1,9 +1,8 @@
 import duckdb
 from math import radians, sin, cos, sqrt, asin
 
-# Haversine Formula
 def haversine(lat1, lon1, lat2, lon2):
-    R = 6371  # Earth radius in KM
+    R = 6371
 
     dlat = radians(lat2 - lat1)
     dlon = radians(lon2 - lon1)
@@ -15,55 +14,50 @@ def haversine(lat1, lon1, lat2, lon2):
         * sin(dlon / 2) ** 2
     )
 
-    c = 2 * asin(sqrt(a))
-
-    return R * c
+    return 2 * R * asin(sqrt(a))
 
 
-# Demo GPS Location (Panvel)
+# User GPS Location
 user_lat = 19.033
 user_lon = 73.029
 
-# Connect Database
-con = duckdb.connect("hospitals.db")
+con = duckdb.connect("hospitals.duckdb")
 
-# Fetch Hospitals
 hospitals = con.execute("""
-SELECT name, latitude, longitude, phone
+SELECT name, country, latitude, longitude, phone
 FROM hospitals
 WHERE latitude IS NOT NULL
-  AND longitude IS NOT NULL
+AND longitude IS NOT NULL
 """).fetchall()
 
-print("Hospitals loaded:", len(hospitals))
+results = []
 
-best_distance = float("inf")
-nearest_hospital = None
-nearest_phone = None
+for name, country, lat, lon, phone in hospitals:
 
-for hospital in hospitals:
-    try:
-        name = hospital[0]
-        lat = float(hospital[1])
-        lon = float(hospital[2])
-        phone = hospital[3]
+    distance = haversine(
+        user_lat,
+        user_lon,
+        float(lat),
+        float(lon)
+    )
 
-        distance = haversine(
-            user_lat,
-            user_lon,
-            lat,
-            lon
-        )
+    results.append(
+        (distance, name, country, lat, lon, phone)
+    )
 
-        if distance < best_distance:
-            best_distance = distance
-            nearest_hospital = name
-            nearest_phone = phone
+# Sort by distance
+results.sort(key=lambda x: x[0])
 
-    except:
-        continue
+print("\n===== TOP 5 NEAREST HOSPITALS =====\n")
 
-print("\n===== NEAREST HOSPITAL =====")
-print("Hospital :", nearest_hospital)
-print("Distance :", round(best_distance, 2), "km")
-print("Phone    :", nearest_phone)
+for i, hospital in enumerate(results[:5], start=1):
+
+    distance, name, country, lat, lon, phone = hospital
+
+    print(f"{i}. {name}")
+    print(f"   Distance : {round(distance,2)} km")
+    print(f"   Country  : {country}")
+    print(f"   Latitude : {lat}")
+    print(f"   Longitude: {lon}")
+    print(f"   Phone    : {phone}")
+    print()
