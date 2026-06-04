@@ -1,0 +1,9 @@
+numpy
+vosk
+sounddevice
+flask
+pyttsx3
+duckdb
+flask-cors
+twilio
+python-dotenv

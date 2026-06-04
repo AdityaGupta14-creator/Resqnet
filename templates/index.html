@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResQNet AI Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <h1>ResQNet <span class="highlight">AI</span></h1>
+            <p>Autonomous Edge Emergency Engine</p>
+        </header>
+        
+        <div class="status-card" id="statusCard">
+            <div class="pulse-ring" id="pulseRing"></div>
+            <h2 id="stateLabel">System Idle</h2>
+            <h1 id="timerDisplay" class="hidden" style="font-size: 4rem; margin: 10px 0;">15</h1>
+            <p id="transcriptLabel">Monitoring telemetry arrays...</p>
+            <div id="hospitalInfo" class="hidden" style="margin-top: 20px; padding: 15px; border: 1px solid #ff4a4a; border-radius: 8px; background-color: rgba(255, 74, 74, 0.1);">
+                <h3 style="color: #ff4a4a; margin-top: 0;">Nearest Hospital</h3>
+                <p id="hospName" style="font-weight: bold; font-size: 1.2rem;"></p>
+                <p id="hospDist"></p>
+                <p id="hospPhone"></p>
+            </div>
+            <button id="resetBtn" class="btn outline hidden" onclick="resetSystem()">Reset System</button>
+        </div>
+
+        <div class="controls">
+            <h3>Live Simulation Controls</h3>
+            <div class="button-grid">
+                <button class="btn secondary" onclick="simulate('pothole')">
+                    <span class="icon">🚗</span> Simulate Pothole
+                </button>
+                <button class="btn primary" onclick="simulate('severe_crash')">
+                    <span class="icon">💥</span> Severe Crash Trigger
+                </button>
+                <button class="btn info" id="sensorBtn" onclick="enableMobileSensors()">
+                    <span class="icon">📱</span> Activate Phone Sensors
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
