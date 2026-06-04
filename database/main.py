@@ -1,8 +1,9 @@
 import duckdb
 from math import radians, sin, cos, sqrt, asin
 
+# Haversine Formula
 def haversine(lat1, lon1, lat2, lon2):
-    R = 6371
+    R = 6371  # Earth radius in km
 
     dlat = radians(lat2 - lat1)
     dlon = radians(lon2 - lon1)
@@ -14,17 +15,29 @@ def haversine(lat1, lon1, lat2, lon2):
         * sin(dlon / 2) ** 2
     )
 
-    return 2 * R * asin(sqrt(a))
+    c = 2 * asin(sqrt(a))
+
+    return R * c
 
 
-# User GPS Location
+# -----------------------------
+# USER LOCATION (Replace later with GPS)
+# -----------------------------
 user_lat = 19.033
 user_lon = 73.029
 
+# -----------------------------
+# CONNECT DATABASE
+# -----------------------------
 con = duckdb.connect("hospitals.duckdb")
 
 hospitals = con.execute("""
-SELECT name, country, latitude, longitude, phone
+SELECT
+    name,
+    country,
+    latitude,
+    longitude,
+    phone
 FROM hospitals
 WHERE latitude IS NOT NULL
 AND longitude IS NOT NULL
@@ -32,22 +45,43 @@ AND longitude IS NOT NULL
 
 results = []
 
-for name, country, lat, lon, phone in hospitals:
+# -----------------------------
+# CALCULATE DISTANCES
+# -----------------------------
+for hospital in hospitals:
+
+    name = hospital[0]
+    country = hospital[1]
+    lat = float(hospital[2])
+    lon = float(hospital[3])
+    phone = hospital[4]
 
     distance = haversine(
         user_lat,
         user_lon,
-        float(lat),
-        float(lon)
+        lat,
+        lon
     )
 
     results.append(
-        (distance, name, country, lat, lon, phone)
+        (
+            distance,
+            name,
+            country,
+            lat,
+            lon,
+            phone
+        )
     )
 
-# Sort by distance
+# -----------------------------
+# SORT BY DISTANCE
+# -----------------------------
 results.sort(key=lambda x: x[0])
 
+# -----------------------------
+# DISPLAY TOP 5
+# -----------------------------
 print("\n===== TOP 5 NEAREST HOSPITALS =====\n")
 
 for i, hospital in enumerate(results[:5], start=1):
@@ -55,7 +89,7 @@ for i, hospital in enumerate(results[:5], start=1):
     distance, name, country, lat, lon, phone = hospital
 
     print(f"{i}. {name}")
-    print(f"   Distance : {round(distance,2)} km")
+    print(f"   Distance : {round(distance, 2)} km")
     print(f"   Country  : {country}")
     print(f"   Latitude : {lat}")
     print(f"   Longitude: {lon}")
